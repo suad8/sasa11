@@ -9,7 +9,6 @@ export async function GET(req) {
 
   const res = NextResponse.redirect(url);
 
-  // امسح كوكي الجلسة
   res.cookies.set(COOKIE_NAME, "", {
     httpOnly: true,
     secure: true,
