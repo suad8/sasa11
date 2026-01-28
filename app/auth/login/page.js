@@ -1,8 +1,7 @@
-"use client";
-export const dynamic = "force-dynamic";
+const res = await fetch("/api/session", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  credentials: "include",   // ⭐ هذا أهم سطر
+  credentials: "include",
   cache: "no-store",
   body: JSON.stringify({ userId }),
 });
