@@ -1,0 +1,40 @@
+"use client";
+
+import { useState } from "react";
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
+
+export default function LoginPage() {
+  const sb = supabaseBrowser();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState("");
+
+  const login = async () => {
+    setMsg("");
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) return setMsg(error.message);
+
+    // create server session cookie
+    const res = await fetch("/api/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: data.user.id }),
+    });
+    if (!res.ok) return setMsg("فشل إنشاء جلسة");
+    window.location.href = "/dashboard";
+  };
+
+  return (
+    <div className="min-h-[70vh] grid place-items-center">
+      <div className="card p-6 md:p-10 w-full max-w-md space-y-4">
+        <div className="text-2xl font-black">تسجيل دخول</div>
+        <div className="text-white/70 text-sm">إيميل + كلمة مرور</div>
+        <input className="input" placeholder="الإيميل" value={email} onChange={(e)=>setEmail(e.target.value)} />
+        <input className="input" placeholder="كلمة المرور" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
+        <button className="btn btnPrimary w-full" onClick={login}>دخول</button>
+        <a className="btn w-full" href="/auth/signup">إنشاء حساب</a>
+        {msg ? <div className="text-white/80 text-sm">{msg}</div> : null}
+      </div>
+    </div>
+  );
+}
