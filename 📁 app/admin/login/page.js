@@ -1,13 +1,41 @@
-export const dynamic = "force-dynamic";
+"use client";
 
-export default function AdminHome() {
+import { useState } from "react";
+
+export default function AdminLogin() {
+  const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const login = async () => {
+    setMsg("");
+    setLoading(true);
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    const j = await res.json().catch(() => ({}));
+    setLoading(false);
+    if (!res.ok) return setMsg(j?.error || "فشل الدخول");
+    window.location.href = "/admin";
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="card p-6 md:p-10">
-        <h1 className="text-2xl md:text-3xl font-extrabold">لوحة التحكم</h1>
-        <p className="mt-2 text-white/70">
-          إذا وصلت هنا ✅ معناها /admin صار شغال. الخطوة الجاية نركّب صفحة إدارة المنيوهات والمنتجات.
-        </p>
+    <div className="min-h-[70vh] grid place-items-center">
+      <div className="card p-6 md:p-10 w-full max-w-md space-y-4">
+        <div className="text-2xl font-black">دخول الأدمن</div>
+        <input
+          className="input"
+          placeholder="كلمة السر"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="btn btnPrimary w-full" onClick={login} disabled={loading}>
+          {loading ? "جاري الدخول..." : "دخول"}
+        </button>
+        {msg ? <div className="text-sm text-white/80">{msg}</div> : null}
       </div>
     </div>
   );
