@@ -8,20 +8,31 @@ export default function LoginPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
   const sp = useSearchParams();
-  const redirectTo = sp.get("redirect") || "/dashboard";
+
+  const next = sp.get("redirect") || "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const login = async () => {
     setMsg("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return setMsg(error.message);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    // مهم عشان Server Components تقرأ الكوكي الجديدة
-    router.replace(redirectTo);
-    router.refresh();
+      if (error) return setMsg(error.message);
+
+      // بعض الحالات: session تتثبت بعد لحظات (middleware)
+      // فنسوي refresh بعد replace
+      router.replace(next);
+      router.refresh();
+    } catch (e) {
+      setMsg(e?.message || "صار خطأ غير متوقع");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,10 +43,13 @@ export default function LoginPage() {
         <input className="input" placeholder="الإيميل" value={email} onChange={(e)=>setEmail(e.target.value)} />
         <input className="input" placeholder="كلمة المرور" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
 
-        <button className="btn btnPrimary w-full" onClick={login}>دخول</button>
+        <button className="btn btnPrimary w-full" onClick={login} disabled={loading}>
+          {loading ? "جاري الدخول..." : "دخول"}
+        </button>
+
         <a className="btn w-full" href="/auth/signup">إنشاء حساب</a>
 
-        {msg ? <div className="text-white/80 text-sm">{msg}</div> : null}
+        {msg ? <div className="text-sm text-white/80">{msg}</div> : null}
       </div>
     </div>
   );
