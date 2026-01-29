@@ -1,4 +1,4 @@
- import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 const COOKIE = "sm_admin";
@@ -12,17 +12,15 @@ export async function POST(req) {
   const real = process.env.ADMIN_PASSWORD;
   const secret = process.env.SESSION_SECRET;
 
-  if (!real || !secret) {
-    return new NextResponse("Missing env vars", { status: 500 });
-  }
+  if (!real || !secret) return new NextResponse("Missing env vars", { status: 500 });
 
   if (password !== real) {
     return NextResponse.json({ ok: false, error: "كلمة السر غير صحيحة" }, { status: 401 });
   }
 
   const token = `ok.${sign("ok", secret)}`;
-
   const res = NextResponse.json({ ok: true });
+
   res.cookies.set(COOKIE, token, {
     httpOnly: true,
     secure: true,
